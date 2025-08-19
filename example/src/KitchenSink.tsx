@@ -7,6 +7,7 @@ import {
      DataDisplayExamples,
      FeedbackExamples,
      LayoutExamples,
+     NavigationExamples,
 } from '../examples';
 
 const Section: React.FC<{ title: string; children: ReactNode }> = ({
@@ -43,6 +44,9 @@ const KitchenSink = () => (
           </Section>
           <Section title="Layout">
                <LayoutExamples />
+          </Section>
+          <Section title="Navigation">
+               <NavigationExamples />
           </Section>
      </Flex>
 );
