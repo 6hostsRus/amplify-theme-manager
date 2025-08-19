@@ -1,1 +1,0 @@
-Generate a "kitchen sink" example for the Amplify Theme Manager, showcasing all components in the AWS Amplify Gen 2 Library and their variations. I want the component examples to include all props and states. Separate all of the examples into different files for better organization. Put the generated files in a dedicated `examples` directory within the `/example` directory.
