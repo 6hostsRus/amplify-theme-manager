@@ -6,6 +6,7 @@ import {
     Menu,
     MenuButton,
     MenuItem,
+    Link,
 } from '@aws-amplify/ui-react';
 
 export const NavigationExamples: React.FC = () => {
@@ -30,6 +31,7 @@ export const NavigationExamples: React.FC = () => {
                 totalPages={5}
                 onChange={(page) => setCurrentPage(page ?? 1)}
             />
+            <Link href="#nav-link">Simple Link</Link>
         </Flex>
     );
 };

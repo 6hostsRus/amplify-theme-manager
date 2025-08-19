@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { Button, Flex } from '@aws-amplify/ui-react';
+import {
+     Button,
+     ButtonGroup,
+     Flex,
+     ToggleButton,
+     ToggleButtonGroup,
+} from '@aws-amplify/ui-react';
 
 export const ButtonExamples: React.FC = () => {
      const [loading, setLoading] = useState(false);
+     const [alignment, setAlignment] = useState('left');
      return (
           <Flex direction="column" gap="1rem">
                <Flex wrap="wrap" gap="0.5rem">
@@ -24,11 +31,23 @@ export const ButtonExamples: React.FC = () => {
                     >
                          Toggle Load
                     </Button>
-                    <Button variation="destructive">Destructive</Button>
                </Flex>
                <Flex wrap="wrap" gap="0.5rem">
-                    <Button>Full Width</Button>
+                    <Button width="100%">Full Width</Button>
                </Flex>
+               <ButtonGroup>
+                    <Button>First</Button>
+                    <Button>Second</Button>
+               </ButtonGroup>
+               <ToggleButtonGroup
+                    value={alignment}
+                    isExclusive
+                    onChange={(value) => setAlignment(value as string)}
+               >
+                    <ToggleButton value="left">Left</ToggleButton>
+                    <ToggleButton value="center">Center</ToggleButton>
+                    <ToggleButton value="right">Right</ToggleButton>
+               </ToggleButtonGroup>
           </Flex>
      );
 };
