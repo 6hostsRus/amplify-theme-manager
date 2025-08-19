@@ -1,95 +1,93 @@
-# AI Assistant Guidelines for amplify-theme-manager
+# AI Assistant Guidelines (amplify-theme-manager)
 
 Concise, project-specific rules so an AI agent can be productive quickly.
 
-## 1. Purpose & Big Picture
+## 1. Purpose
 
-This package provides a runtime **theme + icon management developer panel** for AWS Amplify UI React. It exposes hooks/providers (`AmplifyThemeManagerProvider`, `useThemeManager`, `AmplifyIconsProvider`, `useIconsManager`) and a side panel component `DevThemePanelV3` for editing tokens, applying presets, managing icons, and exporting JSON diffs/full themes. The design favors **immutable updates** (copy-on-write) and **minimal external deps**.
+Runtime theme + icon management for AWS Amplify UI React with an in-browser dev panel (`DevThemePanelV3`) enabling live token edits, presets, icon management, snapshots, and (to add) auto dark-mode toggling. Design goals: immutable theme updates, tiny dependency surface, clear public API.
 
-## 2. Key Source Layout
+## 2. Core Source Map
 
--    `src/react.tsx`: Core theme manager: path parsing (`splitPath`), immutable set (`setAtPath`), deep merge, context provider/hook.
--    `src/dev/DevThemePanel.v3.tsx`: Full panel UI (no CSS framework) with tabs: tokens, presets, icons, inspector, snapshots. Pure React + inline styles.
--    `src/presets.ts`: Theme preset definitions + `findPresetByName`.
--    `src/icons/manager.tsx`: Icons registry (observer pattern) + provider bridging to Amplify's `IconProvider` (fallback safe).
--    `src/icons/presets.tsx`: Minimal + feather icon presets (dynamic import of `react-icons`).
--    `example/`: Vite playground (`vite.config.ts` sets root to `example/src`). Kitchen sink examples live under `example/examples`, rendered via `example/src/kitchen-sink.tsx`.
--    `tsup.config.ts`: Build entries (multi-entry to expose internal modules under subpaths). No code-splitting.
+-    src/react.tsx: ThemeManager (parse paths, immutable setAtPath, deepMerge, context).
+-    src/dev/DevThemePanel.v3.tsx: Side panel (tabs: tokens | presets | icons | inspect | snapshots).
+-    src/presets.ts: Theme presets + lookup.
+-    src/icons/manager.tsx & src/icons/presets.tsx: Observable icons registry + lazy feather set + `makePathIcon`.
+-    src/AmplifyManagedProvider.tsx: Bridges ThemeManager to `<AmplifyProvider theme={...}>` for live updates.
+-    example/ (Vite; root = example/src): Kitchen sink via examples/\*.tsx + kitchen-sink.tsx.
 
-## 3. Build & Dev Workflows
+## 3. Build & Dev
 
--    Install: `pnpm install` (peer deps required in consumer env; here for dev/testing).
--    Library build: `pnpm run build` (tsup -> ESM + d.ts in `dist/`). Entry points must stay declared in `tsup.config.ts` & reflected in `package.json.exports`.
--    Dev watch: `pnpm run dev` (tsup --watch) while running the example for live testing.
--    Example playground: `pnpm run example` (Vite dev server; serves from `example/src`). Ensure `example/src/index.html` references the desired entry (e.g., `kitchen-sink.tsx`).
--    Type check: `pnpm run typecheck`.
+-    Install: pnpm install
+-    Library build: pnpm build (tsup -> ESM + d.ts)
+-    Watch dev (library + example): pnpm dev (tsup --watch) in one terminal, pnpm example (Vite) in another.
+-    Type check: pnpm typecheck
+     Ensure new public files are exported in src/index.ts and mapped in tsup.config.ts + package.json "exports".
 
-## 4. Import/Export Conventions
+## 4. Public API Pattern
 
--    Public API aggregated in `src/index.ts`. Add new public symbols there AND (if a new deep path) add a tsup entry + package.json export mapping.
--    Subpath exports follow pattern: add source `src/icons/foo.ts`, add tsup entry `'icons/foo': 'src/icons/foo.ts'`, then add `"./icons/foo"` export block.
--    Keep peer dependencies (React, Amplify UI, react-icons) out of bundle: add to `external` in `tsup.config.ts`.
+Export everything via src/index.ts. For a new subpath (e.g. icons/foo):
 
-## 5. Theme Management Patterns
+1. Create file.
+2. Add tsup entry (tsup.config.ts).
+3. Add package.json exports mapping.
+4. Re-export in index or rely on subpath.
 
--    All theme updates via `ThemeManager`: `setByPath`, `mergeTheme`, `reset`.
--    Paths support dot + bracket (`a.b[0]['c.d']`). Use `setByPath` (from `createThemeManager`) for mutations; do NOT mutate internal state objects directly.
--    Deep merges intentionally overwrite arrays entirely (see `deepMerge`). Reflect this when designing patches.
--    Tokens often shaped `{ value: ... }`; panel identifies leaf tokens as objects with only a `value` key.
+## 5. Theme Update Rules
 
-## 6. Dev Panel Architecture
+Always mutate through ThemeManager methods: setByPath, mergeTheme, reset. Do not directly mutate stored theme objects. Paths allow dot + bracket notation; arrays are replaced (not merged) by deepMerge. Tokens commonly shaped { value: ... }.
 
--    Inline styles only; maintain style objects for consistency. Add new tab by extending union `'tokens'|'presets'|'icons'|'inspect'` and tab strip.
--    State persisted via `PanelStorage` (localStorage) – replicate key usage if new persisted fields added.
--    Keep performance: expensive computations (e.g., tokenLeaves) are memoized.
+## 6. Dev Panel Conventions
 
-## 7. Icons System
+Inline style objects only. To add a tab: extend the tab union, add button, conditional render block, persist needed state via PanelStorage (localStorage). Memoize heavy computations.
 
--    Icons registry is a simple observable store; always use `icons.set / setAll / remove / reset`.
--    Custom SVG icons built with `makePathIcon(d, name)` (24x24 viewBox, currentColor fill). Maintain this pattern for consistency.
--    Feather preset loaded lazily; failure falls back to `minimal`.
+## 7. Icons
+
+Use iconsManager.set / setAll / remove / reset; never mutate internal map. Custom SVG via makePathIcon (24x24, currentColor). Lazy feather import with graceful fallback.
 
 ## 8. Presets
 
--    Add new presets by pushing to `PRESETS` and ensuring descriptive `name` & `description`. Keep patch minimal & focused (avoid full theme dumps).
+Add to PRESETS with minimal diff patches; avoid full theme dumps. Use findPresetByName for lookup.
 
-## 9. Example / Kitchen Sink
+## 9. Auto Dark-Mode Toggling (New Support)
 
--    Organized examples under `example/examples/*.tsx` each exporting a `*Examples` component.
--    Barrel file `example/examples/index.ts` used in `kitchen-sink.tsx` to assemble sections.
--    When adding a new public component/hook, create an example variant showing typical & edge props.
+Goal: Seamlessly switch theme on system or user preference.
+Pattern:
 
-## 10. Coding Conventions
+-    Add optional dual theme store fields: baseThemeLight, baseThemeDark (immutable).
+-    Detect system preference via window.matchMedia('(prefers-color-scheme: dark)').
+-    Store user override ('light' | 'dark' | 'system') in PanelStorage; when 'system', follow matchMedia; otherwise force selection.
+-    Expose hook useColorMode() returning { mode, setMode, resolvedMode }.
+-    AmplifyManagedProvider: derive activeTheme each render (memo) from manager state + resolvedMode.
+-    Provide utility applyModePatch(lightTheme, darkPatch) if dark mode is a patch over light.
+-    Ensure subscription batching (single manager.notify on mode change).
+-    No additional runtime deps; isolate browser-only logic behind typeof window checks (SSR safety).
 
--    TS strict mode; prefer explicit return types on exported functions if inference is non-trivial.
--    Avoid runtime dependencies beyond React & Amplify UI to keep bundle slim.
--    Use functional React components; minimal hooks; no class components.
--    Prefer small pure helper functions (e.g., `deepMerge`, `splitPath`).
+## 10. Example Integration
 
-## 11. Adding New Surface API
+In kitchen-sink.tsx wrap App with AmplifyThemeManagerProvider + AmplifyManagedProvider. Add a minimal toggle UI in DevThemePanel (mode dropdown). Live modifications still go through ThemeManager; mode switch triggers re-render.
 
-1. Implement file under `src/...`.
-2. Export from appropriate barrel (e.g., `src/index.ts`).
-3. If a new subpath is needed (nested import), add tsup entry + package.json export.
-4. Run `pnpm typecheck && pnpm build`.
-5. Update README with concise usage & add example under `example/examples`.
+## 11. Adding New API
 
-## 12. Testing / Manual QA
+1. Implement under src/.
+2. Export in src/index.ts.
+3. (If subpath) tsup + exports update.
+4. pnpm typecheck && pnpm build.
+5. Add example component demonstrating usage.
 
--    No automated tests present yet; rely on kitchen sink for visual/regression. When changing theme logic, verify: path updates, merge behavior (arrays replaced), snapshots export/import, icon preset switching, and accessibility (panel toggling via shortcut).
+## 12. Manual QA Focus
+
+Verify: token path edits, array replacement semantics, preset application diff, icon preset lazy load fallback, dark-mode auto switch (system + override), snapshot export/import, performance (no excessive re-renders).
 
 ## 13. Common Pitfalls
 
--    Forgetting to add new entry to `exports` -> consumer import failures.
--    Mutating theme object directly -> updates not reflected; must use manager methods.
--    Missing `@aws-amplify/ui-react/styles.css` in example -> unstyled components.
--    Vite root mismatch: keep `vite.config.ts` root aligned with playground location.
+-    Forgetting export mappings -> consumer import fails.
+-    Direct object mutation -> UI not updating.
+-    Missing styles import '@aws-amplify/ui-react/styles.css'.
+-    Not wrapping app with AmplifyManagedProvider -> no live theme reflection.
+-    Dark mode: forgetting to unsubscribe matchMedia on cleanup.
 
 ## 14. Release Checklist
 
--    Bump version in `package.json` (semver).
--    `pnpm clean && pnpm build` (ensure fresh dist).
--    Spot-check dist for expected entry files.
--    `npm publish --access public`.
+Bump version, pnpm clean && pnpm build, verify dist entries, update README for new surface (e.g. dark mode API), npm publish --access public.
 
-Ask for clarification if proposing structural changes or adding dependencies.
+Ask before adding dependencies or altering existing immutable update semantics.

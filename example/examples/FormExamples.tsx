@@ -44,7 +44,7 @@ export const FormExamples: React.FC = () => {
                />
                <PhoneNumberField
                     label="PhoneNumberField"
-                    defaultCountryCode="+1"
+                    defaultDialCode="+1"
                />
                <SelectField label="SelectField" placeholder="Choose one">
                     <option value="a">Option A</option>
@@ -83,10 +83,7 @@ export const FormExamples: React.FC = () => {
                     isDisabled={false}
                />
                <SearchField label="SearchField" placeholder="Search here" />
-               <Autocomplete
-                    label="Autocomplete"
-                    options={fruitOptions}
-               />
+               <Autocomplete label="Autocomplete" options={fruitOptions} />
           </Flex>
      );
 };

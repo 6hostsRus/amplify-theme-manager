@@ -30,7 +30,7 @@ export const DataDisplayExamples: React.FC = () => {
                     <Badge variation="error">Error</Badge>
                </Flex>
                <Flex gap="0.5rem" alignItems="center" wrap="wrap">
-                    <Avatar src="https://via.placeholder.com/40" alt="User Avatar" />
+                    <Avatar src="https://placehold.co/40" alt="User Avatar" />
                     <Rating value={4} maxValue={5} />
                     <Icon
                          ariaLabel="Star Icon"
@@ -42,10 +42,7 @@ export const DataDisplayExamples: React.FC = () => {
                          ]}
                     />
                </Flex>
-               <Image
-                    src="https://via.placeholder.com/150x80"
-                    alt="Example image"
-               />
+               <Image src="https://placehold.co/150x80" alt="Example image" />
                <Placeholder width="100%" height="20px" />
                <Collection type="list" items={['One', 'Two', 'Three']}>
                     {(item, index) => <Text key={index}>{item}</Text>}
