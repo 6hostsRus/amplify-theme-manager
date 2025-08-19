@@ -12,6 +12,12 @@ import {
      TableBody,
      TableRow,
      TableCell,
+     Avatar,
+     Icon,
+     Image,
+     Placeholder,
+     Rating,
+     Collection,
 } from '@aws-amplify/ui-react';
 
 export const DataDisplayExamples: React.FC = () => {
@@ -23,6 +29,27 @@ export const DataDisplayExamples: React.FC = () => {
                     <Badge variation="warning">Warning</Badge>
                     <Badge variation="error">Error</Badge>
                </Flex>
+               <Flex gap="0.5rem" alignItems="center" wrap="wrap">
+                    <Avatar src="https://via.placeholder.com/40" alt="User Avatar" />
+                    <Rating value={4} maxValue={5} />
+                    <Icon
+                         ariaLabel="Star Icon"
+                         viewBox={{ minX: 0, minY: 0, width: 24, height: 24 }}
+                         paths={[
+                              {
+                                   d: 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z',
+                              },
+                         ]}
+                    />
+               </Flex>
+               <Image
+                    src="https://via.placeholder.com/150x80"
+                    alt="Example image"
+               />
+               <Placeholder width="100%" height="20px" />
+               <Collection type="list" items={['One', 'Two', 'Three']}>
+                    {(item, index) => <Text key={index}>{item}</Text>}
+               </Collection>
                <Card variation="elevated">
                     <Heading level={4}>Card Title</Heading>
                     <Text variation="tertiary">

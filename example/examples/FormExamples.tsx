@@ -12,10 +12,17 @@ import {
      SliderField,
      StepperField,
      PhoneNumberField,
+     SearchField,
+     Autocomplete,
 } from '@aws-amplify/ui-react';
 
 export const FormExamples: React.FC = () => {
      const [value, setValue] = useState('');
+     const fruitOptions = [
+          { id: 'apple', label: 'Apple' },
+          { id: 'banana', label: 'Banana' },
+          { id: 'cherry', label: 'Cherry' },
+     ];
      return (
           <Flex direction="column" gap="1.5rem">
                <TextField
@@ -74,6 +81,11 @@ export const FormExamples: React.FC = () => {
                     step={1}
                     defaultValue={3}
                     isDisabled={false}
+               />
+               <SearchField label="SearchField" placeholder="Search here" />
+               <Autocomplete
+                    label="Autocomplete"
+                    options={fruitOptions}
                />
           </Flex>
      );

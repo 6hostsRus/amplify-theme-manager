@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, View, Heading, Text } from '@aws-amplify/ui-react';
+import { Flex, View, Heading, Text, Grid } from '@aws-amplify/ui-react';
 
 const boxStyle: React.CSSProperties = {
      backgroundColor: 'var(--amplify-colors-neutral-20)',
@@ -33,6 +33,14 @@ export const LayoutExamples: React.FC = () => {
                          <View style={boxStyle}>B2</View>
                     </Flex>
                </Flex>
+               <Heading level={5}>Grid (3 columns)</Heading>
+               <Grid templateColumns="repeat(3, 1fr)" gap="0.5rem">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                         <View key={i} style={boxStyle}>
+                              Cell {i + 1}
+                         </View>
+                    ))}
+               </Grid>
           </Flex>
      );
 };
