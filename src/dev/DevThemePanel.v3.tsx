@@ -1,7 +1,5 @@
-import React from 'react';
-import type { Theme } from '@aws-amplify/ui-react';
-import { useThemeManager } from '../react';
-import { deepDiff } from './diff';
+// Backward compatibility re-export. The monolithic implementation was removed in favor
+// of the modular panel under ./panel/DevThemePanelV3. (Avoid duplicating logic.)
 import { PRESETS, findPresetByName } from '../presets';
 import { HslColorInput } from './controls/HslColorInput';
 import { UnitInput } from './controls/UnitInput';
@@ -9,8 +7,10 @@ import { useIconsManager, makePathIcon } from '../icons/manager';
 import { Snapshots, PanelStorage } from './snapshots';
 import * as IconPresets from '../icons/presets';
 import { Combobox } from './Combobox';
-import { enumerateTokenPaths } from '../react';
-
+import { enumerateTokenPaths, useThemeManager } from '../react';
+import React from 'react';
+import { Theme } from '@aws-amplify/ui-react';
+import { deepDiff } from './diff';
 const pretty = (v: unknown) => JSON.stringify(v, null, 2);
 const HEX_RE = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const looksHex = (s: any) => typeof s === 'string' && HEX_RE.test(s);

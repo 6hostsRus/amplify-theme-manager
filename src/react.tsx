@@ -1,5 +1,4 @@
 import React, { PropsWithChildren } from 'react';
-import type { Theme } from '@aws-amplify/ui-react';
 
 type Listener = () => void;
 
@@ -104,6 +103,89 @@ export function useThemeManager<TTheme = any>(): ThemeManager<TTheme> {
      const ctx = React.useContext(Ctx);
      if (!ctx) throw new Error('Missing AmplifyThemeManagerProvider');
      return ctx as ThemeManager<TTheme>;
+}
+
+/* Color Mode Integration */
+export type ColorModeSetting = 'light' | 'dark' | 'system';
+export interface ColorModeContextValue {
+     mode: ColorModeSetting; // user setting
+     setMode: (m: ColorModeSetting) => void;
+     resolvedMode: 'light' | 'dark'; // after applying system preference
+}
+const COLOR_MODE_KEY = 'ATM:colorMode';
+const ColorModeCtx = React.createContext<ColorModeContextValue | null>(null);
+
+function getSystemPref(): 'light' | 'dark' {
+     if (typeof window === 'undefined') return 'light';
+     return window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+}
+function loadStoredMode(): ColorModeSetting {
+     if (typeof window === 'undefined') return 'system';
+     try {
+          const v = localStorage.getItem(COLOR_MODE_KEY);
+          if (v === 'light' || v === 'dark' || v === 'system') return v;
+     } catch {}
+     return 'system';
+}
+
+export const AmplifyColorModeProvider: React.FC<
+     PropsWithChildren<{ initialMode?: ColorModeSetting }>
+> = ({ initialMode, children }) => {
+     const [mode, setModeState] = React.useState<ColorModeSetting>(
+          initialMode ?? loadStoredMode()
+     );
+     const [system, setSystem] = React.useState<'light' | 'dark'>(
+          getSystemPref()
+     );
+
+     // Persist user mode
+     React.useEffect(() => {
+          if (typeof window === 'undefined') return;
+          try {
+               localStorage.setItem(COLOR_MODE_KEY, mode);
+          } catch {}
+     }, [mode]);
+
+     // Listen for system changes when in 'system' mode (light weight)
+     React.useEffect(() => {
+          if (typeof window === 'undefined') return;
+          const mq = window.matchMedia('(prefers-color-scheme: dark)');
+          const handler = () => setSystem(mq.matches ? 'dark' : 'light');
+          handler();
+          mq.addEventListener
+               ? mq.addEventListener('change', handler)
+               : mq.addListener(handler);
+          return () => {
+               mq.removeEventListener
+                    ? mq.removeEventListener('change', handler)
+                    : mq.removeListener(handler);
+          };
+     }, []);
+
+     const setMode = React.useCallback((m: ColorModeSetting) => {
+          setModeState(m);
+     }, []);
+
+     const resolvedMode = mode === 'system' ? system : mode;
+
+     const value = React.useMemo(
+          () => ({ mode, setMode, resolvedMode }),
+          [mode, setMode, resolvedMode]
+     );
+
+     return (
+          <ColorModeCtx.Provider value={value}>
+               {children}
+          </ColorModeCtx.Provider>
+     );
+};
+
+export function useColorMode(): ColorModeContextValue {
+     const ctx = React.useContext(ColorModeCtx);
+     if (!ctx) throw new Error('Missing AmplifyColorModeProvider');
+     return ctx;
 }
 
 /**

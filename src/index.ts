@@ -2,8 +2,8 @@ export {
      AmplifyThemeManagerProvider,
      useThemeManager,
      createThemeManager,
+     AmplifyColorModeProvider,
 } from './react';
-export { DevThemePanelV3 } from './dev/DevThemePanel.v3';
 export { PRESETS, findPresetByName } from './presets';
 export {
      createIconsManager,
@@ -14,3 +14,4 @@ export {
 export * as IconPresets from './icons/presets';
 export { AmplifyManagedProvider } from './AmplifyManagedProvider';
 export { enumerateTokenPaths } from './react';
+export { DevThemePanelV3 } from '../src/dev/panel/DevThemePanelV3';
